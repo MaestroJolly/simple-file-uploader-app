@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Simple File Uploader 📁</h2>
+    <div class="file-upload">
+        File: <input type="file" name="file" id="file">
+        <br>
+        <label for="file">Upload progress:</label>
+        <progress id="file-progress" value="32" max="100"> 0% </progress>
+        <br>
+        <br>
+        <button id="uploader-button">UPLOAD</button>
+    </div>
+
+    <!-- <script src="function.js">
+    </script> -->
+
+    <script>
+
+        const uploadFile = document.querySelector('#uploader-button');
+        const fileProgress = document.querySelector('#file-progress');
+        const file = document.querySelector('#file');
+
+        uploadFile.addEventListener('click', (event) => {
+            console.log(`File Uploader is listening on ${event.target}`);
+            const fileReader = new FileReader();
+
+            const { files } = file;
+            const [ theFile ] = files;
+            fileReader.onload  = async (event) => {
+
+                const CHUNK_SIZE = 1000;
+                const chunkCount = event.target.result.byteLength / CHUNK_SIZE;
+                console.log('Read Successfully.');
+
+                const fileName = Math.random() * 1000 + theFile.name;
+
+                for (let chunckId = 0; chunckId < chunkCount + 1; chunckId++){
+                    const chunck = event.target.result.slice(chunckId * CHUNK_SIZE);
+                    await fetch('http://localhost:5000/upload', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/octect-stream',
+                            'Content-Length': chunck.length,
+                            'file-name': fileName,
+                        },
+                        body: chunck
+                    })
+                }
+
+                console.log(event.target.result.byteLength);
+            }
+            fileReader.readAsArrayBuffer(theFile);
+        })
+
+    </script>
+</body>
+
+</html>
